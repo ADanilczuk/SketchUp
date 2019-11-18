@@ -1,0 +1,100 @@
+module Brighter3DSoftwareDevelopmentLtd
+module BarsPlugin
+
+def BarsPlugin.GO(rad,width,height,amount)
+	
+	mod = Sketchup.active_model
+	  mod.start_operation("Faces offset by our plugin")
+	  
+		g_bar = model.active_entities.add_group
+		
+		ent_g = group1.entities
+		circle_bar = ent_g.add_circle [0.5, 0.5, 1], [0, 0, 1], rad
+		circle_bar.reverse!.pushpull(height)
+		
+		group1 = ent_g.add_group circle_bar.all_connected
+		group = group1
+		
+		distance = width/amount
+	  
+        for i in 0..amount
+			group2 = group1.copy
+			tran = Geom::Transformation.translation [distance, 0, 0]
+			group2.transform! tran
+			group1=group2
+        end
+		
+		tr = Geom::Transformation.new [0, height/2, 0], [0, 0, 1], 90degrees
+		group2 = group.copy
+		group2.transform! tran
+		
+		tran = Geom::Transformation.translation [0, height/2-0.3m, 0]
+		group2.transform! tran
+		
+		x= width/height
+		t = Geom::Transformation.scaling x, 1, 1
+		group2.transform! t
+		
+		while height>0.5m
+			group2 = group1.copy
+			tran = Geom::Transformation.translation [0, -0.5m, 0]
+			group2.transform! tran
+			height = height-0.5
+			group1 = group2
+		end
+      }
+
+  mod.commit_operation
+end
+
+
+def BarsPlugin.InitMenus
+  main_menuBR = UI.menu("Plugins").add_submenu("Bars plugin")    
+  main_menuBR.add_item('Create Bars') {      
+        
+        prompts  = ["Radius of single bar","Width","Height","Amount of bars" ]
+        defaults = [0.03.m,5.m,2.m,14]
+        list     = ["","",""]
+        input = UI.inputbox(prompts, defaults, list, "Bars settings")
+        
+        posX = 0.0
+        posY = 0.0
+        posZ = 0.0
+        rad = input[0]
+        width = input[1]
+        height = input[2]
+		amount = input[3]
+		
+		BarsPlugin.GO(rad,width,height,amount)
+        }  
+  main_menuBR.add_item("About") {
+   UI.messagebox("Tararara about! Test plugin SketchUp Plugin \nversion 1.1.1 \n\n Brighter3D Software Development Ltd.\n All rights reserved (2016-2017)")
+ }
+end
+
+def BarsPlugin.InitToolbar(path)
+  ic1  = File.join(path,"icons/icon1.png")
+  ic1b = File.join(path,"icons/icon1b.png")  
+
+  toolb = UI::Toolbar.new("Bars plugin")
+
+  tbutton1 = UI::Command.new("Go"){ TestPlugin.GO() }
+  tbutton1.tooltip = tbutton1.status_bar_text = "go plugin go"
+  tbutton1.small_icon = ic1
+  tbutton1.large_icon = ic1b
+  toolb.add_item(tbutton1)
+  toolb.show    
+end
+
+#init toolbar
+
+def self.execute
+  # Implement the command here
+  BarsPlugin.InitMenus
+  BarsPlugin.InitToolbar(Sketchup.find_support_file("Plugins/barsPlugin"))
+end
+
+self.execute()
+
+end # module BarsPlugin
+end # module Brighter3DSoftwareDevelopmentLtd
